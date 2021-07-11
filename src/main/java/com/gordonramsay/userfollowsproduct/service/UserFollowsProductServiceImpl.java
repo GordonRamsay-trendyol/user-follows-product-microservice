@@ -54,7 +54,7 @@ public class UserFollowsProductServiceImpl implements UserFollowsProductService 
 
         if (isMobilePriceDecreased || isSalesPriceDecreased) {
             List<UserFollowsProduct> userFollowsProductList = userFollowsProductRepository.findByProductBarcode(barcode);
-            for (var follow: userFollowsProductList) {
+            userFollowsProductList.parallelStream().forEach(follow -> {
                 // TODO: Create proper notification message
                 String message = "";
                 if (isMobilePriceDecreased)
@@ -62,7 +62,7 @@ public class UserFollowsProductServiceImpl implements UserFollowsProductService 
                 if (isSalesPriceDecreased)
                     message = "" + follow.getUserId() + oldSalesPrice + newSalesPrice;
                 kafkaTemplate.send(NOTIFICATION_TOPIC, message);
-            }
+            });
         }
         productRepository.save(product);
     }
