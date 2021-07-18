@@ -1,14 +1,17 @@
 package com.gordonramsay.userfollowsproduct.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+@Setter
+@Getter
 public class AddUserFollowsProductRequest {
-    @NotNull(message = "product can't be null")
-    @NotBlank(message = "product can't be blank")
+    @NotBlank(message = "product barcode can't be blank")
     private String productBarcode;
 
-    @NotNull(message = "user can't be null")
-    @NotBlank(message = "user can't be blank")
+    @NotNull(message = "user id can't be null")
     private Long userId;
 }

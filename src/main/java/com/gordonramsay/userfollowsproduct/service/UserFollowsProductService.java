@@ -1,19 +1,16 @@
 package com.gordonramsay.userfollowsproduct.service;
 
 import com.gordonramsay.userfollowsproduct.dto.AddUserFollowsProductRequest;
-import com.gordonramsay.userfollowsproduct.model.Product;
-import com.gordonramsay.userfollowsproduct.model.UserFollowsProduct;
+import com.gordonramsay.userfollowsproduct.model.FollowedProduct;
 
 import java.util.List;
 
 public interface UserFollowsProductService {
-    UserFollowsProduct addUserFollowsProduct(AddUserFollowsProductRequest request);
+    List<FollowedProduct> getAll();
 
-    UserFollowsProduct getUserFollowsProductById(Long id);
+    void updateFollowedProduct(FollowedProduct product);
 
-    List<UserFollowsProduct> getAll();
+    void saveFollowedProduct(FollowedProduct product);
 
-    void updateProduct(Product product);
-
-    void saveProduct(Product product);
+    FollowedProduct followProduct(AddUserFollowsProductRequest request);
 }

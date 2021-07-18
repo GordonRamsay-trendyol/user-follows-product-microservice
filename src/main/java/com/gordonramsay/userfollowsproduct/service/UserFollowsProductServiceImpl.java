@@ -1,47 +1,34 @@
 package com.gordonramsay.userfollowsproduct.service;
 
 import com.gordonramsay.userfollowsproduct.dto.AddUserFollowsProductRequest;
-import com.gordonramsay.userfollowsproduct.model.Product;
-import com.gordonramsay.userfollowsproduct.model.UserFollowsProduct;
-import com.gordonramsay.userfollowsproduct.repository.ProductRepository;
-import com.gordonramsay.userfollowsproduct.repository.UserFollowsProductRepository;
+import com.gordonramsay.userfollowsproduct.model.FollowedProduct;
+import com.gordonramsay.userfollowsproduct.model.NotificationType;
+import com.gordonramsay.userfollowsproduct.repository.FollowedProductRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class UserFollowsProductServiceImpl implements UserFollowsProductService {
     private static final String NOTIFICATION_TOPIC = "notification";
 
-    private final ProductRepository productRepository;
-    private final UserFollowsProductRepository userFollowsProductRepository;
+    private final FollowedProductRepository followedProductRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     @Override
-    public UserFollowsProduct addUserFollowsProduct(AddUserFollowsProductRequest request) {
+    public List<FollowedProduct> getAll() {
         return null;
     }
 
     @Override
-    public UserFollowsProduct getUserFollowsProductById(Long id) {
-        return null;
-    }
+    public void updateFollowedProduct(FollowedProduct product) {
+        String barcode = product.getBarcode();
 
-    @Override
-    public List<UserFollowsProduct> getAll() {
-        return null;
-    }
-
-    @Override
-    public void updateProduct(Product product) {
-        UUID barcode = product.getBarcode();
-
-        Product oldProduct = productRepository.findById(barcode).orElseThrow(RuntimeException::new);
+        FollowedProduct oldProduct = followedProductRepository.findById(barcode).orElseThrow(RuntimeException::new);
         // TODO: Should we check null parameters, do we want to update fields as null
 
         Double newSalesPrice = product.getSalesPrice();
@@ -52,27 +39,46 @@ public class UserFollowsProductServiceImpl implements UserFollowsProductService 
         boolean isMobilePriceDecreased = isPriceDecreased(oldMobilePrice, newMobilePrice);
         boolean isSalesPriceDecreased = isPriceDecreased(oldSalesPrice, newSalesPrice);
 
-        if (isMobilePriceDecreased || isSalesPriceDecreased) {
-            List<UserFollowsProduct> userFollowsProductList = userFollowsProductRepository.findByProductBarcode(barcode);
-            userFollowsProductList.parallelStream().forEach(follow -> {
-                // TODO: Create proper notification message
-                String message = "";
-                if (isMobilePriceDecreased)
-                    message = "" + follow.getUserId() + oldMobilePrice + newMobilePrice;
-                if (isSalesPriceDecreased)
-                    message = "" + follow.getUserId() + oldSalesPrice + newSalesPrice;
-                kafkaTemplate.send(NOTIFICATION_TOPIC, message);
-            });
+        Set<String> followerIds = oldProduct.getFollowerIds();
+
+        if (isMobilePriceDecreased) {
+            sendPriceDecreasedNotification(followerIds, NotificationType.MOBILE, oldMobilePrice, newMobilePrice);
         }
-        productRepository.save(product);
+
+        if (isSalesPriceDecreased) {
+            sendPriceDecreasedNotification(followerIds, NotificationType.WEB, oldSalesPrice, newSalesPrice);
+        }
+
+        // Update the product with the updated product information
+        followedProductRepository.save(product);
     }
 
     @Override
-    public void saveProduct(Product product) {
-        productRepository.save(product);
+    public void saveFollowedProduct(FollowedProduct product) {
+        followedProductRepository.save(product);
+    }
+
+    @Override
+    public FollowedProduct followProduct(AddUserFollowsProductRequest request) {
+        String barcode = request.getProductBarcode();
+        Long followerId = request.getUserId();
+
+        FollowedProduct followedProduct = followedProductRepository.findById(barcode).orElseThrow(RuntimeException::new);
+        followedProduct.addFollower(String.valueOf(followerId));
+        // TODO: We shouldn't return the whole object because it contains other users ids.
+        return followedProductRepository.save(followedProduct);
     }
 
     private boolean isPriceDecreased(double oldPrice, double newPrice) {
         return oldPrice > newPrice;
+    }
+
+    private void sendPriceDecreasedNotification(Set<String> followerIds, NotificationType notificationType,
+                                                Double oldPrice, Double newPrice) {
+        String campaignMessage = "Hello! Followed products price decreased, take a look if you are still interested";
+        followerIds.forEach(followerId -> {
+            // TODO: Build message here for a user...
+            kafkaTemplate.send(NOTIFICATION_TOPIC, campaignMessage);
+        });
     }
 }
