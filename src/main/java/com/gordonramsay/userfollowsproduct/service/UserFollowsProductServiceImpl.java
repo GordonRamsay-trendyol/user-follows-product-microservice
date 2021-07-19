@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -21,7 +22,9 @@ public class UserFollowsProductServiceImpl implements UserFollowsProductService 
 
     @Override
     public List<FollowedProduct> getAll() {
-        return null;
+        List<FollowedProduct> followedProducts = new ArrayList<>();
+        followedProductRepository.findAll().forEach(followedProducts::add);
+        return followedProducts;
     }
 
     @Override

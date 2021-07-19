@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-//@Component
+@Component
 @RequiredArgsConstructor
 public class KafkaConsumer implements Consumer {
     private final UserFollowsProductService service;

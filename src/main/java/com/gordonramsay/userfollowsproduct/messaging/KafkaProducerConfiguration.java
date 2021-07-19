@@ -11,7 +11,7 @@ import org.springframework.kafka.core.ProducerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-//@Configuration
+@Configuration
 public class KafkaProducerConfiguration {
     private static final String bootstrapAddress = "localhost:9092";
 
