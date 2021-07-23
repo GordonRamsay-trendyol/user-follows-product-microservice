@@ -1,4 +1,4 @@
-package com.gordonramsay.userfollowsproduct.messaging;
+package com.gordonramsay.userfollowsproduct.configuration;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Configuration
 public class KafkaProducerConfiguration {
-    private static final String bootstrapAddress = "localhost:9092";
+    private static final String bootstrapAddress = "kafka:9092";
 
     @Bean
     public ProducerFactory<String, String> producerFactory() {
