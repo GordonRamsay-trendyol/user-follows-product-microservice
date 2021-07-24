@@ -1,7 +1,9 @@
 package com.gordonramsay.userfollowsproduct.service;
 
+import com.alibaba.fastjson.JSON;
 import com.gordonramsay.userfollowsproduct.dto.AddUserFollowsProductRequest;
 import com.gordonramsay.userfollowsproduct.model.FollowedProduct;
+import com.gordonramsay.userfollowsproduct.model.NotificationMsg;
 import com.gordonramsay.userfollowsproduct.model.NotificationType;
 import com.gordonramsay.userfollowsproduct.repository.FollowedProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -45,11 +47,11 @@ public class UserFollowsProductServiceImpl implements UserFollowsProductService 
         Set<String> followerIds = oldProduct.getFollowerIds();
 
         if (isMobilePriceDecreased) {
-            sendPriceDecreasedNotification(followerIds, NotificationType.MOBILE, oldMobilePrice, newMobilePrice);
+            sendPriceDecreasedNotification(followerIds, NotificationType.PUSH, oldMobilePrice, newMobilePrice);
         }
 
         if (isSalesPriceDecreased) {
-            sendPriceDecreasedNotification(followerIds, NotificationType.WEB, oldSalesPrice, newSalesPrice);
+            sendPriceDecreasedNotification(followerIds, NotificationType.EMAIL, oldSalesPrice, newSalesPrice);
         }
 
         // Update the product with the updated product information
@@ -68,7 +70,6 @@ public class UserFollowsProductServiceImpl implements UserFollowsProductService 
 
         FollowedProduct followedProduct = followedProductRepository.findById(barcode).orElseThrow(RuntimeException::new);
         followedProduct.addFollower(String.valueOf(followerId));
-        // TODO: We shouldn't return the whole object because it contains other users ids.
         return followedProductRepository.save(followedProduct);
     }
 
@@ -78,10 +79,17 @@ public class UserFollowsProductServiceImpl implements UserFollowsProductService 
 
     private void sendPriceDecreasedNotification(Set<String> followerIds, NotificationType notificationType,
                                                 Double oldPrice, Double newPrice) {
-        String campaignMessage = "Hello! Followed products price decreased, take a look if you are still interested";
+        String title = "Hello, the product price decreased!";
+        String campaignMessage = "Hello! Followed products price decreased, take a look if you are still interested.";
         followerIds.forEach(followerId -> {
-            // TODO: Build message here for a user...
-            kafkaTemplate.send(NOTIFICATION_TOPIC, campaignMessage);
+            NotificationMsg msg = NotificationMsg.create()
+                    .to(Long.parseLong(followerId))
+                    .title(title)
+                    .content(campaignMessage)
+                    .type(notificationType)
+                    .build();
+
+            kafkaTemplate.send(NOTIFICATION_TOPIC, JSON.toJSONString(msg));
         });
     }
 }
