@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 
 @Setter
 @Getter
-public class AddUserFollowsProductRequest {
+public class UserFollowsProductRequest {
     @NotBlank(message = "product barcode can't be blank")
     private String productBarcode;
 

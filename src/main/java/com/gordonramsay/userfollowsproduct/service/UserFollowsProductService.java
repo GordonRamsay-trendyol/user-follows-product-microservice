@@ -1,6 +1,6 @@
 package com.gordonramsay.userfollowsproduct.service;
 
-import com.gordonramsay.userfollowsproduct.dto.AddUserFollowsProductRequest;
+import com.gordonramsay.userfollowsproduct.dto.UserFollowsProductRequest;
 import com.gordonramsay.userfollowsproduct.model.FollowedProduct;
 
 import java.util.List;
@@ -12,5 +12,7 @@ public interface UserFollowsProductService {
 
     void saveFollowedProduct(FollowedProduct product);
 
-    FollowedProduct followProduct(AddUserFollowsProductRequest request);
+    FollowedProduct followProduct(UserFollowsProductRequest request);
+
+    void unfollowProduct(UserFollowsProductRequest request);
 }

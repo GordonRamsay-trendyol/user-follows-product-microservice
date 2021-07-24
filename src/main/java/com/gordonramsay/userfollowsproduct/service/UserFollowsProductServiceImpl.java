@@ -1,7 +1,7 @@
 package com.gordonramsay.userfollowsproduct.service;
 
 import com.alibaba.fastjson.JSON;
-import com.gordonramsay.userfollowsproduct.dto.AddUserFollowsProductRequest;
+import com.gordonramsay.userfollowsproduct.dto.UserFollowsProductRequest;
 import com.gordonramsay.userfollowsproduct.model.FollowedProduct;
 import com.gordonramsay.userfollowsproduct.model.NotificationMsg;
 import com.gordonramsay.userfollowsproduct.model.NotificationType;
@@ -64,13 +64,24 @@ public class UserFollowsProductServiceImpl implements UserFollowsProductService 
     }
 
     @Override
-    public FollowedProduct followProduct(AddUserFollowsProductRequest request) {
+    public FollowedProduct followProduct(UserFollowsProductRequest request) {
         String barcode = request.getProductBarcode();
         Long followerId = request.getUserId();
 
         FollowedProduct followedProduct = followedProductRepository.findById(barcode).orElseThrow(RuntimeException::new);
         followedProduct.addFollower(String.valueOf(followerId));
         return followedProductRepository.save(followedProduct);
+    }
+
+    @Override
+    public void unfollowProduct(UserFollowsProductRequest request) {
+        String barcode = request.getProductBarcode();
+        Long followerId = request.getUserId();
+
+        FollowedProduct followedProduct = followedProductRepository.findById(barcode).orElseThrow(RuntimeException::new);
+        followedProduct.getFollowerIds().remove(String.valueOf(followerId));
+
+        followedProductRepository.save(followedProduct);
     }
 
     private boolean isPriceDecreased(double oldPrice, double newPrice) {
@@ -80,7 +91,7 @@ public class UserFollowsProductServiceImpl implements UserFollowsProductService 
     private void sendPriceDecreasedNotification(Set<String> followerIds, NotificationType notificationType,
                                                 Double oldPrice, Double newPrice) {
         String title = "Hello, the product price decreased!";
-        String campaignMessage = "Hello! Followed products price decreased, take a look if you are still interested.";
+        String campaignMessage = "Hello! Followed product price is decreased, take a look at it if you are still interested.";
         followerIds.forEach(followerId -> {
             NotificationMsg msg = NotificationMsg.create()
                     .to(Long.parseLong(followerId))

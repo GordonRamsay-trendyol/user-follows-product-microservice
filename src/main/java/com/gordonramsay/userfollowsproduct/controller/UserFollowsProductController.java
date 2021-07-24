@@ -1,6 +1,6 @@
 package com.gordonramsay.userfollowsproduct.controller;
 
-import com.gordonramsay.userfollowsproduct.dto.AddUserFollowsProductRequest;
+import com.gordonramsay.userfollowsproduct.dto.UserFollowsProductRequest;
 import com.gordonramsay.userfollowsproduct.model.FollowedProduct;
 import com.gordonramsay.userfollowsproduct.service.UserFollowsProductService;
 import lombok.Getter;
@@ -45,8 +45,14 @@ public class UserFollowsProductController {
     }
 
     @PostMapping
-    public ResponseEntity<?> follow(@RequestBody @Valid AddUserFollowsProductRequest request) {
+    public ResponseEntity<?> follow(@RequestBody @Valid UserFollowsProductRequest request) {
         var userFollowsProduct = service.followProduct(request);
         return ResponseEntity.ok(userFollowsProduct);
+    }
+
+    @PutMapping("/unfollow")
+    public ResponseEntity<?> unfollow(@RequestBody @Valid UserFollowsProductRequest request) {
+        service.unfollowProduct(request);
+        return ResponseEntity.ok().build();
     }
 }
