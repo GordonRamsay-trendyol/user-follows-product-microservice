@@ -14,7 +14,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/products/subscribe")
+@RequestMapping("/products/subscription")
 @RequiredArgsConstructor
 public class UserFollowsProductController {
     private final UserFollowsProductService service;
