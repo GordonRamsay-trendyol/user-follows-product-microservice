@@ -14,7 +14,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/user-follows-product")
+@RequestMapping("/products/subscription")
 @RequiredArgsConstructor
 public class UserFollowsProductController {
     private final UserFollowsProductService service;
@@ -44,7 +44,7 @@ public class UserFollowsProductController {
         return ResponseEntity.ok().body("Object created!");
     }
 
-    @PostMapping
+    @PostMapping("/follow")
     public ResponseEntity<?> follow(@RequestBody @Valid UserFollowsProductRequest request) {
         var userFollowsProduct = service.followProduct(request);
         return ResponseEntity.ok(userFollowsProduct);
@@ -55,4 +55,5 @@ public class UserFollowsProductController {
         service.unfollowProduct(request);
         return ResponseEntity.ok().build();
     }
+
 }
