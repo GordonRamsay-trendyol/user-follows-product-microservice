@@ -14,13 +14,11 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/products/{barcode}/follow")
+@RequestMapping("/products/subscribe")
 @RequiredArgsConstructor
 public class UserFollowsProductController {
     private final UserFollowsProductService service;
 
-    //How would this fit into the barcode/follow path?
-    //Is this just for testing anyways?
     @GetMapping
     public ResponseEntity<List<FollowedProduct>> getAll() {
         return ResponseEntity.ok(service.getAll());
@@ -46,13 +44,8 @@ public class UserFollowsProductController {
         return ResponseEntity.ok().body("Object created!");
     }
 
-    //id of what? Needs a better name
-    @PostMapping
-    public ResponseEntity<?> follow(@PathVariable String barcode, @RequestHeader Long id) {
-        UserFollowsProductRequest request = new UserFollowsProductRequest();
-        request.setUserId(id);
-        request.setProductBarcode(barcode);
-
+    @PostMapping("/follow")
+    public ResponseEntity<?> follow(@RequestBody @Valid UserFollowsProductRequest request) {
         var userFollowsProduct = service.followProduct(request);
         return ResponseEntity.ok(userFollowsProduct);
     }
