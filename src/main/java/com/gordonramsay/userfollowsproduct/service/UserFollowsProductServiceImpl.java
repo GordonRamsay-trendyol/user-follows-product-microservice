@@ -54,8 +54,11 @@ public class UserFollowsProductServiceImpl implements UserFollowsProductService 
             sendPriceDecreasedNotification(followerIds, NotificationType.EMAIL, oldSalesPrice, newSalesPrice);
         }
 
+        oldProduct.setSalesPrice(newSalesPrice);
+        oldProduct.setMobileSalesPrice(newMobilePrice);
+
         // Update the product with the updated product information
-        followedProductRepository.save(product);
+        followedProductRepository.save(oldProduct);
     }
 
     @Override
